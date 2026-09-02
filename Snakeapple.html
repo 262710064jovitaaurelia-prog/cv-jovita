@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Snake Apple Game</title>
+
+<style>
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    font-family: Arial, sans-serif;
+    color: white;
+    background: linear-gradient(135deg, #101820, #203a43, #2c5364);
+}
+
+.container {
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+}
+
+h1 {
+    font-size: 40px;
+    margin-bottom: 5px;
+    color: #7dff8a;
+}
+
+.subtitle {
+    color: #cbd5df;
+    margin-bottom: 15px;
+}
+
+.game-box {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 15px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.stat {
+    background: rgba(0,0,0,0.25);
+    padding: 10px;
+    border-radius: 12px;
+}
+
+.stat span {
+    display: block;
+    font-size: 11px;
+    color: #9daab7;
+}
+
+.stat strong {
+    font-size: 21px;
+}
+
+#score {
+    color: #7dff8a;
+}
+
+#highScore {
+    color: #ffd966;
+}
+
+#speedName {
+    color: #70e8ff;
+}
+
+.speed-title {
+    margin-bottom: 8px;
+    color: #cbd5df;
+    font-weight: bold;
+}
+
+.speed-buttons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 15px;
+}
+
+.speed-buttons button {
+    border: none;
+    border-radius: 10px;
+    padding: 9px 11px;
+    color: white;
+    background: #293b4d;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.speed-buttons button:hover {
+    background: #385269;
+}
+
+.speed-buttons button.active {
+    background: #16a673;
+    box-shadow: 0 0 12px rgba(22,166,115,0.5);
+}
+
+.board {
+    position: relative;
+    width: min(90vw, 540px);
+    aspect-ratio: 1;
+    margin: auto;
+}
+
+canvas {
+    width: 100%;
+    height: 100%;
+    background: #0c151d;
+    border: 3px solid #385064;
+    border-radius: 17px;
+    display: block;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-box {
+    background: rgba(5,10,15,0.92);
+    border-radius: 18px;
+    padding: 25px;
+}
+
+.overlay-box h2 {
+    margin-bottom: 8px;
+}
+
+.overlay-box p {
+    color: #bbc7d1;
+    margin-bottom: 15px;
