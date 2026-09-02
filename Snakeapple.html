@@ -1,155 +1,504 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Snake Apple Game</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Snake Apple Game</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      font-family:Arial,sans-serif;
+      background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+      color:white;
+      padding:20px;
+    }
+    .container{
+      width:100%;
+      max-width:620px;
+      text-align:center;
+    }
+    h1{
+      font-size:38px;
+      margin-bottom:6px;
+      color:#7CFF8A;
+    }
+    .subtitle{
+      color:#d5e3ea;
+      margin-bottom:18px;
+    }
+    .panel{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.15);
+      border-radius:20px;
+      padding:16px;
+      box-shadow:0 15px 40px rgba(0,0,0,.35);
+    }
+    .stats{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+      margin-bottom:14px;
+    }
+    .stat{
+      background:rgba(0,0,0,.25);
+      padding:10px;
+      border-radius:12px;
+    }
+    .stat span{
+      display:block;
+      font-size:11px;
+      color:#b5c2cc;
+    }
+    .stat b{
+      font-size:21px;
+    }
+    #score{color:#7CFF8A}
+    #highScore{color:#FFD54F}
+    #speedName{color:#7DEBFF}
+    .speed-title{
+      margin-bottom:8px;
+      font-weight:bold;
+    }
+    .speed-buttons{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:7px;
+      margin-bottom:15px;
+    }
+    .speed-buttons button{
+      border:none;
+      padding:9px 10px;
+      border-radius:10px;
+      background:#294154;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .speed-buttons button.active{
+      background:#16A36A;
+    }
+    .board{
+      position:relative;
+      width:min(92vw,560px);
+      aspect-ratio:1;
+      margin:auto;
+    }
+    canvas{
+      width:100%;
+      height:100%;
+      background:#101820;
+      border-radius:16px;
+      border:3px solid #3b5568;
+      display:block;
+    }
+    .overlay{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hidden{display:none}
+    .message{
+      background:rgba(8,12,18,.92);
+      padding:24px;
+      border-radius:18px;
+    }
+    .message p{
+      color:#d3dde5;
+      margin:10px 0 15px;
+      line-height:1.5;
+    }
+    .controls{
+      display:flex;
+      justify-content:center;
+      gap:10px;
+      margin-top:14px;
+    }
+    .controls button,.message button{
+      border:none;
+      padding:10px 16px;
+      border-radius:10px;
+      color:white;
+      font-weight:bold;
+      cursor:pointer;
+    }
+    .start,.restart{background:#16A36A}
+    .pause{background:#6C63FF}
+    .mobile{
+      width:180px;
+      margin:18px auto 0;
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:8px;
+    }
+    .mobile button{
+      height:45px;
+      border:none;
+      border-radius:10px;
+      background:#294154;
+      color:white;
+      font-size:20px;
+      cursor:pointer;
+    }
+    .up{grid-column:2}
+    .left{grid-column:1;grid-row:2}
+    .down{grid-column:2;grid-row:2}
+    .right{grid-column:3;grid-row:2}
+    .info{
+      margin-top:12px;
+      font-size:12px;
+      color:#b8c7d1;
+    }
+    @media(max-width:480px){
+      h1{font-size:30px}
+      .speed-buttons button{font-size:11px}
+    }
+  </style>
+</head>
+<body>
 
-<style>
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+<div class="container">
+  <h1>🐍 Snake Apple</h1>
+  <p class="subtitle">Makan apel dan raih skor tertinggi!</p>
+
+  <div class="panel">
+
+    <div class="stats">
+      <div class="stat">
+        <span>SKOR</span>
+        <b id="score">0</b>
+      </div>
+      <div class="stat">
+        <span>HIGH SCORE</span>
+        <b id="highScore">0</b>
+      </div>
+      <div class="stat">
+        <span>KECEPATAN</span>
+        <b id="speedName">Sangat Lambat</b>
+      </div>
+    </div>
+
+    <div class="speed-title">⚡ Pilih Kecepatan</div>
+
+    <div class="speed-buttons">
+      <button class="active" data-speed="220" data-name="Sangat Lambat">🐢 Sangat Lambat</button>
+      <button data-speed="180" data-name="Lambat">🟢 Lambat</button>
+      <button data-speed="140" data-name="Normal">🟡 Normal</button>
+      <button data-speed="100" data-name="Cepat">🟠 Cepat</button>
+      <button data-speed="70" data-name="Sangat Cepat">🔴 Sangat Cepat</button>
+    </div>
+
+    <div class="board">
+      <canvas id="canvas" width="560" height="560"></canvas>
+
+      <div class="overlay" id="overlay">
+        <div class="message">
+          <h2 id="title">🐍 Snake Apple</h2>
+          <p id="message">Tekan Mulai Game untuk bermain.</p>
+          <button class="start" id="startBtn">▶ Mulai Game</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="pause" id="pauseBtn">⏸ Pause</button>
+      <button class="restart" id="restartBtn">🔄 Restart</button>
+    </div>
+
+    <div class="mobile">
+      <button class="up" data-dir="up">▲</button>
+      <button class="left" data-dir="left">◀</button>
+      <button class="down" data-dir="down">▼</button>
+      <button class="right" data-dir="right">▶</button>
+    </div>
+
+    <p class="info">Arrow Keys / WASD • Space untuk Pause</p>
+
+  </div>
+</div>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+
+const grid=28;
+const size=20;
+
+let snake=[];
+let apple={};
+let direction={x:1,y:0};
+let nextDirection={x:1,y:0};
+
+let score=0;
+let speed=220;
+let running=false;
+let paused=false;
+let timer=null;
+
+let highScore=Number(localStorage.getItem("snakeHighScore")||0);
+document.getElementById("highScore").textContent=highScore;
+
+function init(){
+  snake=[
+    {x:14,y:14},
+    {x:13,y:14},
+    {x:12,y:14}
+  ];
+  direction={x:1,y:0};
+  nextDirection={x:1,y:0};
+  score=0;
+  document.getElementById("score").textContent=0;
+  spawnApple();
+  draw();
 }
 
-body {
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 15px;
-    font-family: Arial, sans-serif;
-    color: white;
-    background: linear-gradient(135deg, #101820, #203a43, #2c5364);
+function spawnApple(){
+  do{
+    apple={
+      x:Math.floor(Math.random()*grid),
+      y:Math.floor(Math.random()*grid)
+    };
+  }while(snake.some(s=>s.x===apple.x&&s.y===apple.y));
 }
 
-.container {
-    width: 100%;
-    max-width: 600px;
-    text-align: center;
+function startGame(){
+  clearInterval(timer);
+  init();
+  running=true;
+  paused=false;
+  document.getElementById("overlay").classList.add("hidden");
+  document.getElementById("pauseBtn").textContent="⏸ Pause";
+  timer=setInterval(update,speed);
 }
 
-h1 {
-    font-size: 40px;
-    margin-bottom: 5px;
-    color: #7dff8a;
+function restartGame(){
+  startGame();
 }
 
-.subtitle {
-    color: #cbd5df;
-    margin-bottom: 15px;
+function update(){
+  direction=nextDirection;
+
+  const head={
+    x:snake[0].x+direction.x,
+    y:snake[0].y+direction.y
+  };
+
+  const willEat=head.x===apple.x&&head.y===apple.y;
+  const body=willEat?snake:snake.slice(0,-1);
+
+  if(
+    head.x<0||
+    head.x>=grid||
+    head.y<0||
+    head.y>=grid||
+    body.some(s=>s.x===head.x&&s.y===head.y)
+  ){
+    gameOver();
+    return;
+  }
+
+  snake.unshift(head);
+
+  if(willEat){
+    score++;
+    document.getElementById("score").textContent=score;
+
+    if(score>highScore){
+      highScore=score;
+      localStorage.setItem("snakeHighScore",highScore);
+      document.getElementById("highScore").textContent=highScore;
+    }
+
+    spawnApple();
+  }else{
+    snake.pop();
+  }
+
+  draw();
 }
 
-.game-box {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 20px;
-    padding: 15px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+function draw(){
+  ctx.fillStyle="#101820";
+  ctx.fillRect(0,0,560,560);
+
+  ctx.strokeStyle="rgba(255,255,255,.05)";
+  for(let i=0;i<=grid;i++){
+    ctx.beginPath();
+    ctx.moveTo(i*size,0);
+    ctx.lineTo(i*size,560);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(0,i*size);
+    ctx.lineTo(560,i*size);
+    ctx.stroke();
+  }
+
+  const ax=apple.x*size+10;
+  const ay=apple.y*size+10;
+
+  ctx.fillStyle="#ff4d5d";
+  ctx.beginPath();
+  ctx.arc(ax,ay,7,0,Math.PI*2);
+  ctx.fill();
+
+  ctx.fillStyle="#59d96b";
+  ctx.beginPath();
+  ctx.ellipse(ax+5,ay-8,6,3,-0.5,0,Math.PI*2);
+  ctx.fill();
+
+  snake.forEach((p,i)=>{
+    const x=p.x*size+2;
+    const y=p.y*size+2;
+
+    ctx.fillStyle=i===0?"#46f59a":"#18b978";
+    ctx.beginPath();
+    ctx.roundRect(x,y,16,16,5);
+    ctx.fill();
+
+    if(i===0){
+      ctx.fillStyle="#102018";
+
+      let e1,e2;
+
+      if(direction.x===1){
+        e1=[x+12,y+5];
+        e2=[x+12,y+12];
+      }else if(direction.x===-1){
+        e1=[x+4,y+5];
+        e2=[x+4,y+12];
+      }else if(direction.y===-1){
+        e1=[x+5,y+4];
+        e2=[x+12,y+4];
+      }else{
+        e1=[x+5,y+12];
+        e2=[x+12,y+12];
+      }
+
+      ctx.beginPath();
+      ctx.arc(e1[0],e1[1],2,0,Math.PI*2);
+      ctx.arc(e2[0],e2[1],2,0,Math.PI*2);
+      ctx.fill();
+    }
+  });
 }
 
-.stats {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 12px;
+function gameOver(){
+  clearInterval(timer);
+  running=false;
+
+  document.getElementById("title").textContent="💥 Game Over";
+  document.getElementById("message").innerHTML=
+    "Skor: <b>"+score+"</b><br>High Score: <b>"+highScore+"</b>";
+  document.getElementById("startBtn").textContent="🔄 Main Lagi";
+  document.getElementById("overlay").classList.remove("hidden");
 }
 
-.stat {
-    background: rgba(0,0,0,0.25);
-    padding: 10px;
-    border-radius: 12px;
+function togglePause(){
+  if(!running)return;
+
+  paused=!paused;
+
+  if(paused){
+    clearInterval(timer);
+    document.getElementById("pauseBtn").textContent="▶ Resume";
+    document.getElementById("title").textContent="⏸ Pause";
+    document.getElementById("message").textContent="Game sedang dijeda.";
+    document.getElementById("startBtn").textContent="▶ Resume";
+    document.getElementById("overlay").classList.remove("hidden");
+  }else{
+    timer=setInterval(update,speed);
+    document.getElementById("pauseBtn").textContent="⏸ Pause";
+    document.getElementById("overlay").classList.add("hidden");
+  }
 }
 
-.stat span {
-    display: block;
-    font-size: 11px;
-    color: #9daab7;
+function changeDirection(dir){
+  if(!running||paused)return;
+
+  if(dir==="up"&&nextDirection.y!==1)
+    nextDirection={x:0,y:-1};
+
+  if(dir==="down"&&nextDirection.y!==-1)
+    nextDirection={x:0,y:1};
+
+  if(dir==="left"&&nextDirection.x!==1)
+    nextDirection={x:-1,y:0};
+
+  if(dir==="right"&&nextDirection.x!==-1)
+    nextDirection={x:1,y:0};
 }
 
-.stat strong {
-    font-size: 21px;
-}
+document.addEventListener("keydown",e=>{
+  const key=e.key.toLowerCase();
 
-#score {
-    color: #7dff8a;
-}
+  const keys={
+    arrowup:"up",
+    w:"up",
+    arrowdown:"down",
+    s:"down",
+    arrowleft:"left",
+    a:"left",
+    arrowright:"right",
+    d:"right"
+  };
 
-#highScore {
-    color: #ffd966;
-}
+  if(keys[key]){
+    e.preventDefault();
+    changeDirection(keys[key]);
+  }
 
-#speedName {
-    color: #70e8ff;
-}
+  if(key===" "){
+    e.preventDefault();
+    togglePause();
+  }
+});
 
-.speed-title {
-    margin-bottom: 8px;
-    color: #cbd5df;
-    font-weight: bold;
-}
+document.querySelectorAll(".mobile button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    changeDirection(btn.dataset.dir);
+  });
+});
 
-.speed-buttons {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
-    gap: 7px;
-    margin-bottom: 15px;
-}
+document.querySelectorAll(".speed-buttons button").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll(".speed-buttons button")
+      .forEach(b=>b.classList.remove("active"));
 
-.speed-buttons button {
-    border: none;
-    border-radius: 10px;
-    padding: 9px 11px;
-    color: white;
-    background: #293b4d;
-    cursor: pointer;
-    font-weight: bold;
-}
+    btn.classList.add("active");
 
-.speed-buttons button:hover {
-    background: #385269;
-}
+    speed=Number(btn.dataset.speed);
 
-.speed-buttons button.active {
-    background: #16a673;
-    box-shadow: 0 0 12px rgba(22,166,115,0.5);
-}
+    document.getElementById("speedName").textContent=
+      btn.dataset.name;
 
-.board {
-    position: relative;
-    width: min(90vw, 540px);
-    aspect-ratio: 1;
-    margin: auto;
-}
+    if(running&&!paused){
+      clearInterval(timer);
+      timer=setInterval(update,speed);
+    }
+  });
+});
 
-canvas {
-    width: 100%;
-    height: 100%;
-    background: #0c151d;
-    border: 3px solid #385064;
-    border-radius: 17px;
-    display: block;
-}
+document.getElementById("startBtn").addEventListener("click",()=>{
+  if(paused){
+    togglePause();
+  }else{
+    startGame();
+  }
+});
 
-.overlay {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
+document.getElementById("restartBtn").addEventListener("click",restartGame);
+document.getElementById("pauseBtn").addEventListener("click",togglePause);
 
-.overlay-box {
-    background: rgba(5,10,15,0.92);
-    border-radius: 18px;
-    padding: 25px;
-}
+init();
+</script>
 
-.overlay-box h2 {
-    margin-bottom: 8px;
-}
-
-.overlay-box p {
-    color: #bbc7d1;
-    margin-bottom: 15px;
+</body>
+    </html>
+    
